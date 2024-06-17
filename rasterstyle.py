@@ -5,9 +5,8 @@ from qgis.core import (
     QgsRasterShader,
     QgsSingleBandPseudoColorRenderer
 )
-
-def applyPseudocolor(layer, ramp_name, invert, interp, mode, num_classes):
-
+from qgis.PyQt.QtGui import QColor
+def applyPseudocolor(layer, ramp_name, invert, interp, mode, num_classes, is_ldv):
     if interp == 0:  # Discrete
         interpolation = QgsColorRampShader.Discrete
     elif interp == 1:  # Liner Interpolated
@@ -33,6 +32,14 @@ def applyPseudocolor(layer, ramp_name, invert, interp, mode, num_classes):
         color_ramp.classifyColorRamp(classes=num_classes, band=1, input=provider)
     else:
         color_ramp.classifyColorRamp(classes=num_classes)
+
+    if is_ldv:
+        if color_ramp.colorRampItemList():
+            color_ramp_item_list = color_ramp.colorRampItemList()
+            if color_ramp_item_list:
+                first_item = color_ramp_item_list[0]
+                first_item.color = QColor(0, 0, 0, 0)
+                color_ramp.setColorRampItemList(color_ramp_item_list)
 
     raster_shader = QgsRasterShader()
     raster_shader.setRasterShaderFunction(color_ramp)

@@ -3,15 +3,15 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=Fast Density Analysis
+name= Fast Line Density Analysis
 qgisMinimumVersion=3.0
-description=A fast kernel density visualization plugin for geospatial analytics
-version=1.6
-author=LibKDV Group
+description=A fast line density visualization plugin for geospatial analytics
+version=1.0
+author=Tsz Nam Chan, Bojian Zhu, Dingming Wu, Yun Peng, Leong Hou U
 email=bjzhu999@gmail.com
-about=A Powerful QGIS plug-in for Large-scale Geospatial AnalyticsUnlock the power of large-scale geospatial analysis - with our QGIS plugin, quickly generate high-resolution kernel density visualizations, supporting advanced analysis tasks such as bandwidth-tuning and spatiotemporal analysis. No matter how large your dataset, our plugin delivers efficient and accurate results. Download now and start a new chapter in your geospatial analysis journey!Power by LibKDV - The fastest library in the world.
-tracker=http://github.com/bojianzhu/qgis-fast-kernel-density-analysis/issues
-repository=http://github.com/bojianzhu/qgis-fast-kernel-density-analysis
+about=This plugin is built based on an efficient solution, called LARGE, for generating line density visualization (LDV) with non-trivial accuracy guarantees under a single machine setting. Our preliminary experiment results show that this solution can achieve up to 291.8x speedups over the state-of-the-art solutions. One research article that is based on this solution is submitted to a prestigious conference in computer science. More details (e.g., technical parts and implementation details) will be released after this article is accepted.
+tracker=http://github.com/bojianzhu/qgis-fast-line-density-analysis/issues
+repository=http://github.com/bojianzhu/qgis-fast-line-density-analysis
 # End of mandatory metadata
 
 # Recommended items:
@@ -21,9 +21,9 @@ hasProcessingProvider=yes
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=python,analysis,kernel,density,kernel density,heatmap,hotspot,spatiotemporal,geospatial analytics,network,network analysis,large-scale
+tags=python,analysis,line density,hotspot,geospatial analytics,large-scale
 
-homepage=http://github.com/libkdv/libkdv
+homepage=http://github.com/bojianzhu/qgis-fast-line-density-analysis
 category=Plugins
 icon=icon.png
 # experimental flag
