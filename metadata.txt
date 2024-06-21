@@ -6,7 +6,7 @@
 name= Fast Line Density Analysis
 qgisMinimumVersion=3.0
 description=A fast line density visualization plugin for geospatial analytics
-version=1.1
+version=1.2
 author=Tsz Nam Chan, Bojian Zhu, Dingming Wu, Yun Peng, Leong Hou U
 email=bjzhu999@gmail.com
 about=This plugin is built based on an efficient solution, called LARGE, for generating line density visualization (LDV) with non-trivial accuracy guarantees under a single machine setting. Our preliminary experiment results show that this solution can achieve up to 291.8x speedups over the state-of-the-art solutions. One research article that is based on this solution is submitted to a prestigious conference in computer science. More details (e.g., technical parts and implementation details) will be released after this article is accepted.
