@@ -8,9 +8,9 @@ This plugin is built based on an efficient solution, called LARGE, for generatin
 
 Efficient and accurate line density visualization.
 
-### **GUI:**
+### **Plugin Interface**
 
-<img src="README.assets/image-20240615181029296.png" alt="image-20240615181029296" style="zoom: 33%;" />
+![image-20250319135008590](README.assets/image-20250319135008590.png)
 
 #### Note:
 
@@ -37,6 +37,29 @@ POINT(-122.40612 37.73278), POINT(-122.40127 37.71141)
 
 Each row in the CSV file represents a connection between a start point and an end point, with the coordinates specified in the WKT (Well-Known Text) format `POINT(longitude latitude)`.
 
-### **Result:**
+### **Important parameters:**
+
+1. **Width** 
+   The width in pixels for the output visualization.
+2. **Height** 
+   The height in pixels for the output visualization.
+3. **Spatial bandwidth (meters)** 
+   The influence radius (in meters) used for line density calculations.
+4. **Type** 
+   The method used for the LDV. Possible options include:
+   - **epsilon LDV (𝜖LDV)**: generating LDV with an 𝜖-relative error guarantee.
+   - **tau LDV (𝜏LDV)**: generating LDV with multiple thresholds.
+5. **Relative error** 
+   The 𝜖-relative error guarantee for 𝜖LDV.
+6. **Number of thresholds** 
+   The number of discrete thresholds for 𝜏LDV.
+
+### **Result Demo**
+
+**𝜖LDV:**
 
 ![image-20240615181059678](README.assets/image-20240615181059678.png)
+
+**𝜏LDV:**
+
+![image-20250320020129855](README.assets/image-20250320020129855.png)

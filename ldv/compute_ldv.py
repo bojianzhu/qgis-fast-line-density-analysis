@@ -44,7 +44,7 @@ def load_library(libname, loader_path):
     raise OSError("no file with expected extension")
 
 
-dll_names = ['libldv.dll', 'libldv.so']
+dll_names = ['libldv.dll', 'libldv1.so']
 
 ldv_C_library = None
 for dll_name in dll_names:

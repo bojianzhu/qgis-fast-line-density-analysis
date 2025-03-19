@@ -68,27 +68,33 @@ class LineDensityAnalysisPlugin(object):
 
     def unload(self):
         try:
-            logging.debug('Removing plugin menu item')
-            self.iface.removePluginMenu('Fast line density analysis', self.ldvAction)
+            if hasattr(self, 'ldvAction') and self.ldvAction:
+                self.iface.removePluginMenu('Fast line density analysis', self.ldvAction)
+                self.ldvAction = None
         except Exception as e:
             logging.error(f"Error removing plugin menu item: {e}")
 
         try:
             logging.debug('Removing toolbar icon')
-            self.iface.removeToolBarIcon(self.kdvsToolbar)
+            if hasattr(self, 'kdvsToolbar') and self.kdvsToolbar:
+                self.iface.removeToolBarIcon(self.kdvsToolbar)
+                self.kdvsToolbar = None
         except Exception as e:
             logging.error(f"Error removing toolbar icon: {e}")
 
         try:
-            if self.toolbar:
-                logging.debug('Deleting toolbar')
-                del self.toolbar
+            if hasattr(self, 'toolbar') and self.toolbar:
+                self.iface.mainWindow().removeToolBar(self.toolbar)
+                self.toolbar.deleteLater()
+                self.toolbar = None
         except Exception as e:
             logging.error(f"Error deleting toolbar: {e}")
 
         try:
             logging.debug('Removing processing provider')
-            QgsApplication.processingRegistry().removeProvider(self.provider)
+            if hasattr(self, 'provider') and self.provider:
+                QgsApplication.processingRegistry().removeProvider(self.provider)
+                self.provider = None
         except Exception as e:
             logging.error(f"Error removing processing provider: {e}")
 

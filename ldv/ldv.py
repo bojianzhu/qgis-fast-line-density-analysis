@@ -11,14 +11,20 @@ from numpy import ndarray, array
 import time
 
 class ldv:
-    def __init__(self, csv_file=None, start_field=None, end_field=None, X=320, Y=240, bandwidth=1000, epsilon=0.1, prjPath=None, feedback=None):
+    # type = 0 : epsilon LDV, para is relative error
+    # type = 1 : tau LDV, para is threshold
+    def __init__(self, csv_file=None, start_field=None, end_field=None, X=320, Y=240, bandwidth=1000, type=0, para=0.1, prjPath=None, feedback=None):
         '''
         dataset = "Beijing"
         method = 4  # LARGE + R-tree
         X = 320 # row pixels
         Y = 240 # colum pixels
         bandwidth = 1000 # Spatial bandwidth
-        epsilon = 0.1 # relative error
+        type = 0 # epsilon LDV
+            para = 0.1 # relative error
+        type = 1 # tau LDV
+            para = 10 # threshold
+
         '''
         self.result = None
         self.ref_lat = None
@@ -27,11 +33,13 @@ class ldv:
         self.csv_file = csv_file
         self.start_field = start_field
         self.end_field = end_field
+        self.type = type
         self.method = 4
         self.X = X
         self.Y = Y
         self.bandwidth = bandwidth
-        self.epsilon = epsilon
+
+        self.para = para
         self.prjPath = prjPath
         self.txtPath = prjPath + "/temp/LDV/tempTxt"
         self.outputPath = prjPath + "/temp/LDV/output"
@@ -45,13 +53,14 @@ class ldv:
                      self.txtPath,
                      self.outputPath,
                      self.method,
+                     self.type,
                      self.X,
                      self.Y,
                      self.bandwidth,
-                     self.epsilon
+                     self.para
                      ]
         self.args = [str(x).encode('ascii') for x in self.args]
-
+        self.feedback.pushInfo('args: {}'.format(self.args))
     def compute(self):
         self.feedback.pushInfo('Start preprocess raw data')
         start = time.time()
@@ -64,12 +73,14 @@ class ldv:
         self.feedback.pushInfo('Start compute LDV ')
         start = time.time()
         ldv = compute_ldv(self.args)
+
         end = time.time()
         duration = end - start
         self.feedback.setProgress(80)
         self.feedback.pushInfo('End compute LDV, duration:{}s'.format(duration))
 
         result = pd.read_csv(StringIO(ldv), sep=' ', names=['x', 'y', 'val'])
+        # self.feedback.pushInfo('ldv result:{}'.format(result))
         self.result = getInverted_result(result, self.ref_lat, self.x_min, self.y_min)
         return self.result
 

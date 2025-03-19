@@ -59,7 +59,9 @@ class LDVAlgorithm(QgsProcessingAlgorithm):
     WIDTH = 'WIDTH'
     HEIGHT = 'HEIGHT'
     SPATIALBANDWIDTH = 'SPATIALBANDWIDTH'
+    TYPE = 'TYPE'
     RELATIVEERROR = 'RELATIVEERROR'
+    THRESHOLDS = 'THRESHOLDS'
     RAMPNAME = 'RAMPNAME'
     INVERT = 'INVERT'
     INTERPOLATION = 'INTERPOLATION'
@@ -120,15 +122,35 @@ class LDVAlgorithm(QgsProcessingAlgorithm):
             )
         )
         self.addParameter(
+            QgsProcessingParameterEnum(
+                self.TYPE,
+                'Type',
+                options=['epsilon LDV', 'tau LDV'],
+                defaultValue=0
+            )
+        )
+        self.addParameter(
             QgsProcessingParameterNumber(
                 self.RELATIVEERROR,
-                'Relative error',
+                'Relative error(for epsilon LDV)',
                 type=QgsProcessingParameterNumber.Double,
                 minValue=0,
                 defaultValue=0.1,
                 optional=False
             )
         )
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.THRESHOLDS,
+                'Number of thresholds(for tau LDV)',
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=1,
+                defaultValue=10,
+                optional=False
+            )
+        )
+
+
         if Qgis.QGIS_VERSION_INT >= 32200:
             param = QgsProcessingParameterString(
                 self.RAMPNAME,
@@ -183,7 +205,7 @@ class LDVAlgorithm(QgsProcessingAlgorithm):
             self.MODE,
             'Mode',
             options=['Continuous', 'Equal Interval', 'Quantile'],
-            defaultValue=2,
+            defaultValue=1,
             optional=False)
         param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(param)
@@ -214,7 +236,14 @@ class LDVAlgorithm(QgsProcessingAlgorithm):
         row_pixels = self.parameterAsInt(parameters, self.WIDTH, context)
         col_pixels = self.parameterAsInt(parameters, self.HEIGHT, context)
         bandwidth_s = self.parameterAsDouble(parameters, self.SPATIALBANDWIDTH, context)
-        epsilon = self.parameterAsDouble(parameters, self.RELATIVEERROR, context)
+        selected_type = self.parameterAsEnum(parameters, self.TYPE, context)
+        if selected_type == 0:  # epsilon LDV
+            para = self.parameterAsDouble(parameters, self.RELATIVEERROR, context)
+            feedback.pushInfo(f'Relative error: {para}')
+        elif selected_type == 1:  # tau LDV
+            para = self.parameterAsInt(parameters, self.THRESHOLDS, context)
+            feedback.pushInfo(f'Number of thresholds: {para}')
+
 
 
         if Qgis.QGIS_VERSION_INT >= 32200:
@@ -224,8 +253,9 @@ class LDVAlgorithm(QgsProcessingAlgorithm):
         invert = self.parameterAsBool(parameters, self.INVERT, context)
         interp = self.parameterAsInt(parameters, self.INTERPOLATION, context)
         mode = self.parameterAsInt(parameters, self.MODE, context)
+
         num_classes = self.parameterAsInt(parameters, self.CLASSES, context)
-        rlayer = processLDV(csv_file, start_field, end_field, row_pixels, col_pixels, bandwidth_s, epsilon,ramp_name, invert, interp, mode,
+        rlayer = processLDV(csv_file, start_field, end_field, row_pixels, col_pixels, bandwidth_s, selected_type, para, ramp_name, invert, interp, mode,
                             num_classes, feedback)
 
         return {self.OUTPUT: rlayer}
@@ -262,7 +292,8 @@ class LDVAlgorithm(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(__file__), 'icons/ldv.png'))
 
-def processLDV(csv_file, start_field, end_field, row_pixels, col_pixels, bandwidth_s, epsilon, ramp_name, invert, interp, mode, num_classes,
+
+def processLDV(csv_file, start_field, end_field, row_pixels, col_pixels, bandwidth_s, type, para, ramp_name, invert, interp, mode, num_classes,
                feedback):
     # Get currentTime
     currentTime =datetime.now()
@@ -280,7 +311,7 @@ def processLDV(csv_file, start_field, end_field, row_pixels, col_pixels, bandwid
         feedback.pushInfo('Create diectory failed, error:{}'.format(e))
         # QgsMessageLog.logMessage("Create diectory failed, error:{}".format(e), MESSAGE_CATEGORY, level=Qgis.Info)
     # Start LDV
-    ldv_data = ldv(csv_file, start_field, end_field, row_pixels, col_pixels, bandwidth_s, epsilon, prjPath, feedback)
+    ldv_data = ldv(csv_file, start_field, end_field, row_pixels, col_pixels, bandwidth_s, type, para, prjPath, feedback)
     result = ldv_data.compute()
     if feedback.isCanceled():
         return {}
@@ -292,6 +323,12 @@ def processLDV(csv_file, start_field, end_field, row_pixels, col_pixels, bandwid
     result.rename(columns={"lon": "x", "lat": "y", "val": "value"}, inplace=True)
     # Sorted according to first y minus then x increasing (from top left corner, top to bottom left to right)
     result_sorted = result.sort_values(by=["y", "x"], ascending=[False, True])
+
+    unique_values = result['value'].unique()  # 获取所有不同的值
+    feedback.pushInfo('Unique_values:{}'.format(unique_values))
+    value_counts = result['value'].value_counts()
+    feedback.pushInfo('Value_counts:{}'.format(value_counts))
+
     path = savePath + "/LDV_Result"
     result_sorted.to_csv(path + ".xyz", index=False, header=False, sep=" ")
     demn = gdal.Translate(path + ".tif", path + ".xyz", outputSRS="EPSG:4326")
